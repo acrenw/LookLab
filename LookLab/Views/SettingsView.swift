@@ -1,0 +1,18 @@
+//
+//  SettingsView.swift
+//  LookLab
+//
+//  Created by Cera Wang on 2025-06-02.
+//
+
+import SwiftUI
+
+struct SettingsView: View {
+    var body: some View {
+        Text("settings")
+    }
+}
+
+#Preview {
+    SettingsView()
+}
