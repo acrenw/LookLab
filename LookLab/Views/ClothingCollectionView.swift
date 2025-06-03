@@ -1,33 +1,27 @@
 //
-//  WardrobeFolderView.swift
+//  ClothingCollectionView.swift
 //  LookLab
 //
-//  Created by Cera Wang on 2025-06-02.
+//  Created by Cera Wang on 2025-06-03.
 //
 
 import SwiftUI
 
-struct WardrobeFolderView: View {
+struct ClothingCollectionView: View {
     // State variables
     // TODO: make into deisgn type later
     @State private var selectedBox: String?
     @State private var renamedTitle: String = ""
     @State private var showRenamePrompt: Bool = false
     
+    // Passed in data
+    var folder: String // TODO: make into object
+    
     // TODO: pseudo data for now
-    var folders: [Int: [String: String]] = [
-        1: [
-            "title": "Folder 1",
-            "image": "📁"
-        ],
-        2: [
-            "title": "Folder 2",
-            "image": "📁"
-        ],
-        3: [
-            "title": "Folder 3",
-            "image": "📁"
-        ]
+    var folders: [Int: String] = [
+        1: "👗",
+        2: "👗",
+        3: "👗"
     ]
     
     // Define 3 equal columns for box display
@@ -49,15 +43,12 @@ struct WardrobeFolderView: View {
                     LazyVGrid(columns: columns) {
                         ForEach(folders.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
                             ProjectView(
-                                content: value["image"] ?? "",
-                                title: value["title"] ?? "",
+                                content: value,
+                                title: "",
                                 onProjectTapped: {
-                                    selectedBox = value["title"] ?? ""// TODO: change to just value, design type
+                                    selectedBox = value // TODO: change to just value, design type
                                 },
-                                onTitleTapped: {
-                                    renamedTitle = value["title"] ?? ""
-                                    showRenamePrompt = true
-                                }
+                                onTitleTapped: {}
                             )
                         }
                     }
@@ -68,14 +59,8 @@ struct WardrobeFolderView: View {
                 get: {selectedBox != nil},
                 set: {if !$0 {selectedBox = nil}}
             )) {
-                if let folder = selectedBox {
-                    ClothingCollectionView(folder: folder)
-                }
-            }
-            .alert("Rename", isPresented: $showRenamePrompt) {
-                TextField(renamedTitle, text: $renamedTitle)
-                Button("OK", role: .cancel) {
-                    // TODO: save rename to db
+                if let clothing = selectedBox {
+                    ClothingView(clothing: clothing)
                 }
             }
         }
@@ -83,5 +68,5 @@ struct WardrobeFolderView: View {
 }
 
 #Preview {
-    WardrobeFolderView()
+    ClothingCollectionView(folder: "")
 }

@@ -13,12 +13,14 @@ struct ModelPreviewView: View {
             LinearGradient(colors: [Color(hex: "#FFE591"), Color(hex: "#FF99E5"), Color(hex: "#AD47FF")], startPoint: .bottomLeading, endPoint: .topTrailing)
                 .ignoresSafeArea()
             
-            HStack {
-                // TODO: replace with actual model
-                Text("🧍‍♀️")
-                    .font(.system(size: 250))
+            VStack {
+                Spacer()
                 
-                VStack{
+                ZStack(alignment: .bottom) {
+                    // TODO: replace with actual model
+                    Text("🧍‍♀️")
+                        .font(.system(size: 250))
+                    
                     VStack {
                         Button(action: {
                             // take off all outfits
@@ -56,8 +58,19 @@ struct ModelPreviewView: View {
                                 .foregroundColor(Color(hex: "#373539"))
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.bottom, 30)
+                    .padding(.trailing, 60)
                 }
+                
+                Spacer()
+                
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.white)
+                    .frame(maxWidth: UIScreen.main.bounds.width / 3, maxHeight: 7, alignment: .bottom)
+                    .padding()
             }
+            
         }
     }
 }
