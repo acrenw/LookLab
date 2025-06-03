@@ -6,12 +6,16 @@
 //
 
 import FirebaseAuth
+import FirebaseFirestore
 import Foundation
+import SwiftUI
 
 class LoginViewViewModel : ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var error: String = ""
+    
+    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
     
     init() {}
     
@@ -22,16 +26,71 @@ class LoginViewViewModel : ObservableObject {
         }
         
         // Try login
-        Auth.auth().signIn(withEmail: email, password: password)
+        Auth.auth().signIn(withEmail: email, password: password) { result, error in
+            if let error = error as NSError? {
+                print("Firebase error code: \(error.code)")
+                print("NSError:", error)
+                
+                if let errorCode = AuthErrorCode(rawValue: error.code) {
+                    switch errorCode {
+                    case .userNotFound:
+                        self.error = "No user found with this email."
+                    case .wrongPassword:
+                        self.error = "Incorrect password."
+                    case .invalidEmail:
+                        self.error = "Invalid email address."
+                    case .networkError:
+                        self.error = "Network error. Try again."
+                    default:
+                        self.error = error.localizedDescription
+                    }
+                } else {
+                    self.error = error.localizedDescription
+                }
+                print("Login failed:", self.error)
+                return
+            }
+            
+            // Login successful
+            print("Logged in successfully with UID:", result?.user.uid ?? "")
+            self.isLoggedIn = true
+        }
     }
-    
+        
     func signInAnonymously() {
         Auth.auth().signInAnonymously { result, error in
-           if let error = error {
-               print("Anonymous sign-in failed:", error.localizedDescription)
-           } else {
-               print("Signed in anonymously with UID:", result?.user.uid ?? "")
-           }
+            guard let user = result?.user else { return }
+            self.createUserIfNeeded(user: user) {
+                self.isLoggedIn = true
+            }
+        }
+    }
+    
+    private func createUserIfNeeded(user: FirebaseAuth.User, completion: @escaping () -> Void) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(user.uid)
+        
+        userRef.getDocument { docSnapshot, error in
+            if let doc = docSnapshot, doc.exists {
+                // User doc already exists
+                completion()
+            } else {
+                // Create new user doc
+                let userData: [String: Any] = [
+                    "id": user.uid,
+                    "isAnonymous": user.isAnonymous,
+                    "createdAt": Timestamp(date: Date())
+                ]
+                
+                userRef.setData(userData) { err in
+                    if let err = err {
+                        print("Error creating user document:", err.localizedDescription)
+                    } else {
+                        print("Anonymous user document created in Firestore")
+                        completion()
+                    }
+                }
+            }
         }
     }
     

@@ -8,7 +8,11 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @StateObject var viewModel = ProfileViewViewModel()
     @State private var selectedPage: ProfilePageEnum? = nil
+    @State private var showLogoutAlert: Bool = false
+    
+    @AppStorage("isLoggedIn") var isLoggedIn: Bool = true
     
     var body: some View {
         NavigationStack {
@@ -81,14 +85,42 @@ struct ProfileView: View {
                         
                         Spacer()
                         
+                        if viewModel.user?.isAnonymous ?? false
+                        {
+                            Button(action: {
+                                viewModel.goToRegister = true
+                            }) {
+                                Text("Sign Up")
+                                    .foregroundColor(Color(hex: "#FF99E5"))
+                                    .bold()
+                            }
+                            .padding(.horizontal)
+                        }
+                        
                         Button(action: {
-                            // TODO: log out from view model
+                            if viewModel.user?.isAnonymous ?? false {
+                                showLogoutAlert = true
+                            } else {
+                                viewModel.logout()
+                            }
                         }) {
                             Text("Log Out")
-                                .foregroundColor(Color(hex: "#FF99E5"))
+                                .foregroundColor(.red)
                                 .bold()
                         }
                         .padding()
+                        .alert("Log out?", isPresented: $showLogoutAlert) {
+                            Button("Log Out", role: .destructive) {
+                                viewModel.logout()
+                            }
+                            Button("Sign Up", role: .none) {
+                                viewModel.goToRegister = true
+                            }
+                            Button("Cancel", role: .cancel) {}
+                            // TODO: make colour visible
+                        } message: {
+                            Text("You’re currently signed in anonymously. If you log out, your data will be lost. Sign up to keep your data.")
+                        }
                     }
                     .padding()
                     .navigationDestination(item: $selectedPage) { page in
@@ -103,6 +135,10 @@ struct ProfileView: View {
                             PrivacyView()
                         }
                     }
+                    .navigationDestination(isPresented: $viewModel.goToRegister) {
+                        RegisterView()
+                    }
+
                 }
             }
         }

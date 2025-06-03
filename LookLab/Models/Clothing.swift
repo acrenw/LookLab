@@ -16,3 +16,4 @@ import Foundation
 // original price
 // discount
 // notes: could be like, use for diy, got for birthday gift, etc
+// favourite? bool

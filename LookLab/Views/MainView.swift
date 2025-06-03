@@ -9,13 +9,18 @@ import SwiftUI
 
 struct MainView: View {
     @StateObject var viewModel = MainViewViewModel()
+    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
+    @AppStorage("anonRegistered") var anonRegistered: Bool = false
     
     init() {
         UITabBar.appearance().unselectedItemTintColor = UIColor(Color(hex: "#6F627B"))
+        if anonRegistered {
+            anonRegistered = false
+        }
     }
     
     var body: some View {
-        NavigationView() {
+        NavigationStack() {
             TabView {
                 DesignView()
                     .tabItem {
@@ -31,7 +36,7 @@ struct MainView: View {
                     }
             }
             .tint(Color(hex: "#FCA8E1"))
-         }
+        }
     }
 }
 
